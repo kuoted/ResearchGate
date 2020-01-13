@@ -5,9 +5,13 @@ module = "thuthesis"
 supportdir = "./testfiles/support-main"
 
 checksuppfiles = {"fontset.tex"}
-demofiles = {"main.tex", "thusetup.tex", "math_commands.tex", "data", "figures", "ref"}
-installfiles = {"*.cls", "*.bst", "tsinghua.pdf"}
-sourcefiles = {"*.dtx", "*.ins", "*.bst", "tsinghua.pdf"}
+sourcefiles = {"thuthesis.dtx", "thuthesis.ins", "*.bst", "tsinghua.pdf"}
+typesetfiles = {}
+docfiles = {"thuthesis.pdf"}
+textfiles = {"README.md"}
+demofiles = {"Makefile", "main.tex", "thusetup.tex", "math_commands.tex", "data", "figures", "ref"}
+packtdszip = true
+installfiles = {"thuthesis.cls", "*.bst", "tsinghua.pdf"}
 
 checkengines = {"xetex"}
 stdengine = "xetex"
