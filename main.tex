@@ -2,7 +2,7 @@
 % !TeX program = xelatex
 % !TeX spellcheck = en_US
 
-\documentclass[degree=master]{thuthesis}
+\documentclass[degree=master,bib-backend=biblatex]{thuthesis}
   % 学位 degree:
   %   doctor | master | bachelor | postdoc
   % 学位类型 degree-type:
@@ -11,6 +11,8 @@
 
 % 论文基本配置，加载宏包等全局配置
 \input{thusetup.tex}
+
+\bibliography{ref/refs.bib}
 
 
 \begin{document}
@@ -46,10 +48,7 @@
 % \listofequations  % 公式索引
 
 % 参考文献
-\bibliographystyle{thuthesis-numeric}      % 顺序编码制
-% \bibliographystyle{thuthesis-author-year}  % 著者-出版年制
-% \bibliographystyle{thuthesis-bachelor}     % 本科生参考文献的著录格式
-\bibliography{ref/refs}
+\printbibliography
 
 % 致谢
 \input{data/acknowledgements}

@@ -13,6 +13,7 @@ tlmgr install latexmk l3build \
     cjk ctex environ ms trimspaces ulem xecjk zhnumber \
     fandol tex-gyre xits \
     bibunits caption enumitem etoolbox footmisc notoccite pdfpages unicode-math \
+    biber biblatex biblatex-gb7714-2015 xstring \
     booktabs koma-script nomencl ntheorem siunitx xkeyval \
     bitset letltxmacro pdfescape pdflscape \
     hologo listings xcolor \

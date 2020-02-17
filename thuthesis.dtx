@@ -1146,6 +1146,13 @@
       english,
     },
   },
+  bib-backend = {
+    name = bib@backend,
+    choices = {
+      bibtex,
+      biblatex,
+    },
+  },
 }
 %    \end{macrocode}
 %
@@ -1242,8 +1249,14 @@
 %
 % 参考文献引用宏包。
 %    \begin{macrocode}
-\RequirePackage[sort&compress]{natbib}
-\RequirePackage{bibunits}
+\ifthu@bib@backend@bibtex
+  \RequirePackage[sort&compress]{natbib}
+  \RequirePackage{bibunits}
+\else
+  \ifthu@bib@backend@biblatex
+    \RequirePackage[backend=biber,style=gb7714-2015]{biblatex}
+  \fi
+\fi
 %    \end{macrocode}
 %
 %    \begin{macrocode}
@@ -3141,9 +3154,15 @@
 % \begin{macro}{\inlinecite}
 % 依赖于 \pkg{natbib} 宏包，修改其中的命令。 旧命令 \cs{onlinecite} 依然可用。
 %    \begin{macrocode}
-\DeclareRobustCommand\inlinecite{\@inlinecite}
-\def\@inlinecite#1{\begingroup\let\@cite\NAT@citenum\citep{#1}\endgroup}
-\let\onlinecite\inlinecite
+\ifthu@bib@backend@bibtex
+  \DeclareRobustCommand\inlinecite{\@inlinecite}
+  \def\@inlinecite#1{\begingroup\let\@cite\NAT@citenum\citep{#1}\endgroup}
+  \let\onlinecite\inlinecite
+\else
+  \ifthu@bib@backend@biblatex
+    \let\@inlinecite\parencite
+  \fi
+\fi
 %    \end{macrocode}
 % \end{macro}
 %
@@ -3153,12 +3172,17 @@
 %
 % 复用 \pkg{natbib} 的 \texttt{thebibliography} 环境，调整距离。
 %    \begin{macrocode}
-\renewcommand\bibsection{\thu@chapter*{\bibname}}
-\renewcommand\bibfont{\ifthu@degree@bachelor\wuhao[1.619]\else\wuhao[1.5]\fi}
-\setlength\bibhang{2\ccwd}
-\addtolength{\bibsep}{-0.7em}
-\setlength{\labelsep}{0.4em}
-\def\@biblabel#1{[#1]\hfill}
+\ifthu@bib@backend@bibtex
+  \renewcommand\bibsection{\thu@chapter*{\bibname}}
+  \renewcommand\bibfont{\ifthu@degree@bachelor\wuhao[1.619]\else\wuhao[1.5]\fi}
+  \setlength\bibhang{2\ccwd}
+  \addtolength{\bibsep}{-0.7em}
+  \setlength{\labelsep}{0.4em}
+  \def\@biblabel#1{[#1]\hfill}
+\else
+  \ifthu@bib@backend@biblatex
+  \fi
+\fi
 %    \end{macrocode}
 %
 % 几种种引用样式：
@@ -3173,71 +3197,81 @@
 %
 % 设置 \option{cite-style} 的接口：
 %    \begin{macrocode}
-\@namedef{bibstyle@thuthesis-inline}{\bibpunct{[}{]}{,}{n}{,}{,}}
-\thu@define@key{
-  cite-style = {
-    name = cite@style,
-    code = {
-      \@nameuse{bibstyle@thuthesis-\thu@cite@style}
-    },
+\ifthu@bib@backend@bibtex
+  \@namedef{bibstyle@thuthesis-inline}{\bibpunct{[}{]}{,}{n}{,}{,}}
+  \thu@define@key{
+    cite-style = {
+      name = cite@style,
+      code = {
+        \@nameuse{bibstyle@thuthesis-\thu@cite@style}
+      },
+    }
   }
-}
+\else
+  \ifthu@bib@backend@biblatex
+  \fi
+\fi
 %    \end{macrocode}
 %
 % 下面修改 \pkg{natbib} 的引用格式，主要是将页码写在上标位置。
 % numeric 模式的 \cs{citet} 的页码：
 %    \begin{macrocode}
-\patchcmd\NAT@citexnum{%
-  \@ifnum{\NAT@ctype=\z@}{%
-    \if*#2*\else\NAT@cmt#2\fi
-  }{}%
-  \NAT@mbox{\NAT@@close}%
-}{%
-  \NAT@mbox{\NAT@@close}%
-  \@ifnum{\NAT@ctype=\z@}{%
-    \if*#2*\else\textsuperscript{#2}\fi
-  }{}%
-}{}{}
+\newcommand\thu@patch@natbib{%
+  \patchcmd\NAT@citexnum{%
+    \@ifnum{\NAT@ctype=\z@}{%
+      \if*##2*\else\NAT@cmt##2\fi
+    }{}%
+    \NAT@mbox{\NAT@@close}%
+  }{%
+    \NAT@mbox{\NAT@@close}%
+    \@ifnum{\NAT@ctype=\z@}{%
+      \if*##2*\else\textsuperscript{##2}\fi
+    }{}%
+  }{}{}
 %    \end{macrocode}
 %
 % Numeric 模式的 \cs{citep} 的页码：
 %    \begin{macrocode}
-\renewcommand\NAT@citesuper[3]{\ifNAT@swa
-  \if*#2*\else#2\NAT@spacechar\fi
-\unskip\kern\p@\textsuperscript{\NAT@@open#1\NAT@@close\if*#3*\else#3\fi}%
-   \else #1\fi\endgroup}
+  \renewcommand\NAT@citesuper[3]{\ifNAT@swa
+    \if*##2*\else##2\NAT@spacechar\fi
+  \unskip\kern\p@\textsuperscript{\NAT@@open##1\NAT@@close\if*##3*\else##3\fi}%
+     \else ##1\fi\endgroup}
 %    \end{macrocode}
 %
 % Author-year 模式的 \cs{citet} 的页码：
 %    \begin{macrocode}
-\patchcmd{\NAT@citex}{%
-  \if*#2*\else\NAT@cmt#2\fi
-  \if\relax\NAT@date\relax\else\NAT@@close\fi
-}{%
-  \if\relax\NAT@date\relax\else\NAT@@close\fi
-  \if*#2*\else\textsuperscript{#2}\fi
-}{}{}
+  \patchcmd{\NAT@citex}{%
+    \if*##2*\else\NAT@cmt##2\fi
+    \if\relax\NAT@date\relax\else\NAT@@close\fi
+  }{%
+    \if\relax\NAT@date\relax\else\NAT@@close\fi
+    \if*##2*\else\textsuperscript{##2}\fi
+  }{}{}
 %    \end{macrocode}
 %
 % Author-year 模式的 \cs{citep} 的页码：
 %    \begin{macrocode}
-\renewcommand\NAT@cite%
-    [3]{\ifNAT@swa\NAT@@open\if*#2*\else#2\NAT@spacechar\fi
-        #1\NAT@@close\if*#3*\else\textsuperscript{#3}\fi\else#1\fi\endgroup}
+  \renewcommand\NAT@cite%
+      [3]{\ifNAT@swa\NAT@@open\if*##2*\else##2\NAT@spacechar\fi
+          ##1\NAT@@close\if*##3*\else\textsuperscript{##3}\fi\else##1\fi\endgroup}
 %    \end{macrocode}
 %
 % 在顺序编码制下，\pkg{natbib} 只有在三个以上连续文献引用才会使用连接号，
 % 这里修改为允许两个引用使用连接号。
 %    \begin{macrocode}
-\patchcmd{\NAT@citexnum}{%
-  \ifx\NAT@last@yr\relax
-    \def@NAT@last@yr{\@citea}%
-  \else
-    \def@NAT@last@yr{--\NAT@penalty}%
-  \fi
-}{%
-  \def@NAT@last@yr{-\NAT@penalty}%
-}{}{}
+  \patchcmd{\NAT@citexnum}{%
+    \ifx\NAT@last@yr\relax
+      \def@NAT@last@yr{\@citea}%
+    \else
+      \def@NAT@last@yr{--\NAT@penalty}%
+    \fi
+  }{%
+    \def@NAT@last@yr{-\NAT@penalty}%
+  }{}{}
+}
+\ifthu@bib@backend@bibtex
+  \thu@patch@natbib
+\fi
 %    \end{macrocode}
 %
 % \subsection{附录}
